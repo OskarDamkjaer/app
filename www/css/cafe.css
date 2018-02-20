@@ -1,0 +1,14 @@
+.cafe-container {
+  height: 100%;
+}
+
+.cafe-slide span {
+  text-align:center;
+  display:block;
+  margin:20px;
+  font-size:21px;
+}
+
+#registerbutton {
+	background:#eb7125;
+}

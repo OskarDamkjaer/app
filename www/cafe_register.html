@@ -1,0 +1,105 @@
+<div data-page="caferegister" class="page no-tabbar">
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="left sliding">
+          <a href="#" class="back link">
+            <i class="icon icon-back"></i>
+            {{#unless @global.android}}<span>Tillbaka</span>{{/unless}}
+          </a>
+        </div>
+        <div class="center sliding">Jobba i Hilbert</div>
+      </div>
+    </div>
+    <div class="page-content settings-content">
+      <center>
+        <div class="content-block-title about-title">Jobba</div>
+      </center>
+      <div class="content-block">
+        <b>
+          <ul>
+            <li>Ät gratis macka den dagen du jobbar!</li>
+            <li>Få gå på caféfesten, om du går fyra gånger!</li>
+            <li>Hänga med nära och kära F:are!</li>
+          </ul>
+        </b>
+        <!-- Slider container -->
+        <div class="page-content infinite-scroll">
+          <div class="list-block">
+            <ul>
+              <li class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Item 1</div>
+                </div>
+              </li>
+              <li class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Item 2</div>
+                </div>
+              </li>
+              <li class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Item 20</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- Preloader -->
+          <div class="infinite-scroll-preloader">
+            <div class="preloader"></div>
+          </div>
+        </div> 
+        <div class="content-block-title about-title center">Anmäl dig till Caféet</div>
+        <div class="list-block" id="apply-list">
+          <ul>
+            <li>
+              <div class="item-content">
+                <div class=item-media><i class="fa fa-user-o"></i></div>
+                <div class="item-inner">
+                  <div class="item-title label">Namn</div>
+                  <div class="label">Abbe</div>
+                </div>
+            </li>
+            <li>
+              <div class="item-content">
+                <div class=item-media><i class="fa fa-group"></i></div>
+                <div class="item-inner">
+                  <div class="item-title label">Utskott</div>
+                  <div class="item-input">
+                    <input type="text" placeholder="Utskottsnamn">
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div class="item-content">
+                <div class=item-media><i class="fa fa-group"></i></div>
+                <div class="item-inner">
+                  <div class="item-title label">Grupp</div>
+                  <div class="item-input">
+                    <select class="groupselect">>
+
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <ul>
+            <div class="item-content">
+              <div class=item-media><i class="fa fa-star"></i></div>
+              <div class=item-inner>
+                <div class="item-title label">Cafétävling</div>
+                <div class="item-input">
+                  <label class="label-switch">
+                    <input type="checkbox">
+                    <div class="checkbox"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </ul>
+          <p><a href="#" id="registerbutton" class="button button-fill">Anmäl</a></p>
+      </div>
+    </div>
+  </div>
+</div>
