@@ -3,17 +3,39 @@
 //Init cafe
 myApp.onPageInit('caferegister', function (page) {
 
-    var data = new Object();
-    data.start = '2018-02-18';
-    data.end = '2018-02-20';
+    //Init pickers
 
-    $.getJSON(API + '/cafe/index/', data)
+    $.getJSON(API + '/groups')
+      .then(function(resp) {
+        var groups = resp.groups.reverse();
+        if(groups.length != 0) {
+          var list = [];
+          for(i = 0; i < groups.length; i++) {
+            list[i] = groups[i].name;
+            console.log(list[i]);
+          }
+        }
+        initGroupPicker(list);
+        console.log(resp);
+    });
+
+    var data = new Object();
+    data.start = '2018-02-25';
+    data.end = '2018-02-28';
+
+    $.getJSON(API + '/cafes/', data)
     .done(function(resp){
-        console.log('worked');
+      console.log(resp);
+        console.log(resp.cafe_shifts[0].id);
+        work(resp.cafe_shifts[0].id);
+
     })
     .fail(function(resp){
-        console.log('didnt');
+        console.log(resp);
     });
+
+
+    //Init infinite scroll
 
     var loading = false;
      
@@ -62,9 +84,57 @@ myApp.onPageInit('caferegister', function (page) {
       }, 1000);
     }); 
 
-    var groups = getGroups();
- //   var templateHTML = myApp.templates.groupTemplate(groups);
-    var groupContent = $('.groupselect');
-    groupContent.html(groups);
-
 });
+
+function initGroupPicker(groupData) {
+    //init variables
+    var groupPicker = myApp.picker({
+      input: '#group-picker',
+      toolbarCloseText: 'Klar',
+      cols: [
+      {
+        textAlign: 'center',
+        values: groupData
+      }
+      ],
+        onClose: function(){
+
+      }
+    });
+}
+
+function initUtskottPicker(utskottData) {
+    //init variables
+    var groupPicker = myApp.picker({
+      input: '#utskott-picker',
+      toolbarCloseText: 'Klar',
+      cols: [
+      {
+        textAlign: 'center',
+        values: utskottData
+      }
+      ],
+      onClose: function(){
+
+      }
+    });
+
+}
+
+function work(id) {
+    $.ajax({
+      url: API + '/cafes/',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        cafe_shift_id: id
+      },
+      success: function(resp) {
+        myApp.alert('Du är nu anmäld till eventet', 'Anmälan');
+        updateSignupContent(eventData);
+      },
+      fail: function(resp) {
+        myApp.alert(resp.data.errors);
+      }
+    });
+}
