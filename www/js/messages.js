@@ -7,6 +7,20 @@ $$(document).on('page:init', '.page[data-name="messages"]', function (e) {
   const head = $(e.target);
 
   initMessages(head, e.detail.route.params);
+
+  $('#fredmansky').on('click', function() {
+    $.ajax({
+      url: API + '/fredmansky',
+      type: 'POST',
+      dataType: 'json',
+      success: function() {
+        app.dialog.alert('Gratulerar! Du har hittat ett av appens easter eggs!','Ett Easter Egg!');
+      },
+      fail: function(resp) {
+        app.dialog.alert(resp.data.errors);
+      }
+    });
+  });
 });
 
 $$('#msg-btn').on('click', function() {
