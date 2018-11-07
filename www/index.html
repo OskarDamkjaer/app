@@ -32,6 +32,8 @@
     <link rel="stylesheet" href="css/contact.css">
     <link rel="stylesheet" href="css/nollning.css">
     <link rel="stylesheet" href="css/adventures.css">
+    <link rel="stylesheet" href="css/cafe.css">
+
   </head>
   <body class="color-theme-white">
     <div id="app">
@@ -50,7 +52,7 @@
                         </div>
                         <div class="item-inner">
                           <div class="item-input-wrap">
-                            <input type="email" name="email" placeholder="E-postadress">
+                            <input type="email" name="email" placeholder="E-postadress" value="admin@fsektionen.se">
                           </div>
                         </div>
                       </li>
@@ -60,7 +62,7 @@
                         </div>
                         <div class="item-inner">
                           <div class="item-input-wrap">
-                            <input type="password" name="password" placeholder="Lösenord">
+                            <input type="password" name="password" placeholder="Lösenord" value="passpass">
                           </div>
                         </div>
                       </li>
@@ -257,6 +259,15 @@
                       <div class="item-content">
                         <div class="item-inner">
                           <div class="item-title">Sångbok</div>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/cafe/" class="item-link">
+                      <div class="item-content">
+                        <div class="item-inner">
+                          <div class="item-title">Hilbert Café</div>
                         </div>
                       </div>
                     </a>
@@ -867,6 +878,8 @@
         {{/each}}
       </script>
 
+
+
       <script type="text/template7" id="songTemplate">
         {{#each song}}
           <div class="block-title">{{title}}</div>
@@ -885,7 +898,41 @@
           </div>
         {{/each}}
       </script>
+
+      <script type="text/template7" id="cafeTemplate">
+        {{#each years}}
+          <div class="timeline-year">
+              <div class="timeline-year-title"style="color: #000"><span>{{firstYear}}</span></div>
+              {{#each months}}
+                  <div class="timeline-month">
+                    <div class="timeline-month-title"style="color: #000">{{monthname}}</div>
+                    {{#each days}}
+                    <div class="timeline-item">
+                      <div class="timeline-item-date"style="color: #000">{{day}}, {{date}}:e</div>
+                      <div class="timeline-item-content">
+                      {{#each shift}}
+                      <div class="timeline-item-inner">
+                      <a href="cafe_shift/{{id}}" class="item-link">
+                        <div class="timeline-item-time">{{time}}</div>
+                        <div class="timeline-item-text">pass: {{pass}}</div>
+                        </a>
+                        </div>
+                        {{/each}}
+                      </div>
+                    </div>
+                    {{/each}}
+
+                  </div>
+                  {{/each}}
+
+              </div>
+      {{/each}}
+      </script>
+
+
     </section>
+
+
 
     <!-- External JS Libraries -->
     <script type="text/javascript" src="cordova.js"></script>
@@ -922,6 +969,8 @@
     <script type="text/javascript" src="js/adventures.js"></script>
     <script type="text/javascript" src="js/adventures_highscore.js"></script>
     <script type="text/javascript" src="js/nollning.js"></script>
+    <script type="text/javascript" src="js/cafe.js"></script>
+
   </body>
 </html>
 
