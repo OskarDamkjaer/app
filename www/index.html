@@ -907,16 +907,27 @@
                   <div class="timeline-month">
                     <div class="timeline-month-title"style="color: #000">{{monthname}}</div>
                     {{#each days}}
-                    <div class="timeline-item">
+                    <div class="timeline-item ">
                       <div class="timeline-item-date"style="color: #000">{{day}}, {{date}}:e</div>
-                      <div class="timeline-item-content">
+                      <div class="timeline-item-content ">
                       {{#each shift}}
-                      <div class="timeline-item-inner">
-                      <a href="cafe_shift/{{id}}" class="item-link">
-                        <div class="timeline-item-time">{{time}}</div>
-                        <div class="timeline-item-text">pass: {{pass}}</div>
+                      {{#if name}}
+                      <div class="timeline-item-inner bg-color-green" id="{{id}}">
+                      <a href="cafe_shift/{{id}}" class="item-link asd">
+                      <div class="timeline-item-time">{{time}}</div>
+                      <div class="timeline-item-text">{{name}}</div>
+
+                      {{else}}
+                      <div class="timeline-item-inner bg-color-red" id="{{id}}">
+                      <a href="cafe_shift/{{id}}" class="item-link asd">
+                      <div class="timeline-item-time">{{time}}</div>
+                      {{/if}}
+
+
                         </a>
+
                         </div>
+
                         {{/each}}
                       </div>
                     </div>
