@@ -1,10 +1,20 @@
+// TODO: inte kunna anmäla sig på pass som är upptagna
+// avanmäla sig från pass man är anmäld till
+// council_id, hämta API?
+// Rutor in line med varandra
+// Nu går det inte att anmäla sig till pass längre
+// Egen ruta för tiden
+// "Ledig" på lediga pass
+// pop-up om man försöker anmäla sig till pass som man inte får anmäla sig till
+// on page:init hämta pass... ?? vaför uppdateras inte sidan när man anmält sig
+// Avanmäla/ändra sina uppgifter knapp i formuläret
 
 
 $$(document).on('page:init', '.page[data-name="cafe"]', function (e) {
 
 console.log('DEBUG1')
   const events = [ {start: 30, end: 150}, {start: 540, end: 600}, {start: 560, end: 620}, {start: 610, end: 670} ];
-  $.getJSON(API + '/cafe?start=2018-10-25&end=2018-11-10')
+  $.getJSON(API + '/cafe?start=2018-10-01&end=2018-11-20')
     .done(function(resp) {
       console.log('DEBUG2')
       console.log(resp.cafe_shifts);
@@ -37,7 +47,7 @@ var createDates = (shiftdata) => {
   var counter_years = 0;
   var counter_months = 0;
   var counter_days = 0;
-  //var user = $.auth.user.name;
+  var is_me = false;
 //  yearList[counter_years].months[]
   // console.log(yearList);
 //  yearList[counter_years].months.push({days:[], monthname: currentMonth});
@@ -49,6 +59,13 @@ var createDates = (shiftdata) => {
     user_name = element.user;
     if(user_name != null){
       user_name = element.user.name;
+      if(element.user.id == $.auth.user.id){
+        is_me = true;
+        console.log('YES');
+      }else{
+        is_me = false;
+        console.log('No');
+      }
     }
     // look over the time string..
     timestring = date.getHours().toString()+':'+date.getMinutes().toString();
@@ -59,7 +76,7 @@ var createDates = (shiftdata) => {
         if(date.getMonth() == currentMonth){ //if same month as last month, put in same month
           if(date.getDay() == currentDay){ // if same day as last day, put in same day
             // push the shifts into current day
-              yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name});
+              yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
 
         }else{ // create new day if not same as last
             currentDay = date.getDay();
@@ -69,7 +86,7 @@ var createDates = (shiftdata) => {
             // push day into current month
             yearList[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
             // push the first shift of the day into the day
-            yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name});
+            yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
 
           }
         }else{ // create new month if not same as last
@@ -82,7 +99,7 @@ var createDates = (shiftdata) => {
           monthString = monthNames[currentMonth];
           yearList[counter_years].months.push({days:[], monthname: monthString});
           yearList[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
-          yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id:shift_id, name: user_name});
+          yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id:shift_id, name: user_name, me: is_me});
         }
       } else {// If not same year as last element create new year
         counter_months = 0;
@@ -111,10 +128,6 @@ var createDates = (shiftdata) => {
     var templateHTML = app.templates.cafeTemplate({years: yearList});
     var cafeList = $('#cafe-list');
     cafeList.html(templateHTML);
-
-    $$('.asd').on('click', function(){
-      console.log('hejhej')
-    });
   }
 
 
@@ -135,6 +148,8 @@ var createDates = (shiftdata) => {
     //      - if admin all names should show.
     //      - make sure one can change toggel.
     //      - Group option should pop-up only if övrig is chosen as utskott
+    //      - council_id
+
     app.form.fillFromData('#shift-form', shift); // fill in name TODO: Make unwritable
     var committePicker = app.picker.create({
       inputEl: '#user-committe-input',
@@ -154,24 +169,12 @@ var createDates = (shiftdata) => {
     $('.shift-update').on('click', function() {
       updateShift(shift);
     //  updateAllShifts();
-      app.dialog.create({
-          title: 'Nu är du uppskriven på passet! ',
-          text: 'Tack för att du vill jobba i caféet! Kom ihåg att avanmäla dig om du får förhinder.',
-          buttons: [
-            {
-              text: 'Ok',
-            }
-          ],
-          horizontalButtons: true,
-        }).open();
     });
 
 }
 
 function updateShift(shift) {
-  console.log('here');
-  //user_id, competition, group, council_ids
-
+  //Update shift with it's new user
   var shiftData = app.form.convertToData('#shift-form');
   // Check answer to cafe competition
   if(shiftData['switch'].length == 0){
@@ -192,30 +195,61 @@ function updateShift(shift) {
         group: shift['group'],
         competition: shift['competition']
       }
+   },
+   success: function(){
+     console.log(app);
+     alternativesView.router.navigate('/cafe/');
+     var element, name, arr;
+       element = document.getElementById(shift['id']);
+       var el = $('#' + shift['id']);
+       console.log(el);
+       console.log(shift['id']);
+        green = "bg-color-green";
+        red = "bg-color-red";
+        el.addClass(green);
+        el.removeClass(red);
+        app.dialog.create({
+            title: 'Nu är du uppskriven på passet! ',
+            text: 'Tack för att du vill jobba i caféet! Kom ihåg att avanmäla dig om du får förhinder.',
+            buttons: [
+              {
+                text: 'Ok',
+              }
+            ],
+            horizontalButtons: true,
+          }).open();
+      //  el.find(".timeline-item-text").text($.auth.user.name);
+
+      //  console.log(el.find(".timeline-item-text"));
+   },
+   error: function(){
+     alternativesView.router.navigate('/cafe/');
+     app.dialog.create({
+         title: 'Något gick fel! ',
+         text: 'Testa att anmäla dig igen.',
+         buttons: [
+           {
+             text: 'Ok',
+           }
+         ],
+         horizontalButtons: true,
+       }).open();
+
    }
   });
+//TODO: update main page
 
 
-  //TODO: here look in calendar.js for inspo
-  // Add the new info to box and color it green
-  var element, name, arr;
 
-    element = document.getElementById(shift['id']);
-    el = $('#' + shift['id']);
-    console.log(el);
-    console.log(shift['id']);
-    name = "bg-color-green";
-    //arr = element.className.split(" ");
-    //if (arr.indexOf(name) == -1) {
-    //    element.className += " " + name;
-    //}
+
+
+    //arr = el.className.split(" ");
+    // if (arr.indexOf(name) == -1) {
+    //    el.className += " " + name;
+    // }
 
 }
-function updateAllShifts(){
 
-  //TODO: Go through all shifts to check if someone works - then color box
-
-}
 
 
 
