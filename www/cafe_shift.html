@@ -1,3 +1,4 @@
+
 <div data-name="cafe_shift" class="page no-toolbar">
   <div class="navbar">
     <div class="navbar-inner sliding">
@@ -12,8 +13,8 @@
 
   <div class="page-content shift-content">
     <div class="user-container">
-      <div class="user-avatar"></div>
-      <p>Date and time of shift (this changes with js)</p>
+      <div class="hilbert-avatar"></div>
+      <p id="header_text">Date and time of shift (this changes with js)</p>
     </div>
     <form id="shift-form" class="list">
       <ul>
@@ -21,7 +22,7 @@
           <div class="item-inner">
             <div class="item-title item-label">Användare</div>
             <div class="item-input-wrap">
-              <input id="user-name-input" name="name" type="text" placeholder="Namn">
+              <input id="user-name-input" name="name" type="text" placeholder="Namn" readonly>
             </div>
           </div>
         </li>
@@ -54,7 +55,8 @@
        </div>
    </li>
       </ul>
-      <a class="shift-update button button-big color-orange button-fill">Arbeta på passet</a>
+      <a class="shift-update button button-big button-fill" style="background-color:#EB7125;">Arbeta på passet</a>
+      <a class="shift-unsign button button-big color-red button-fill">Avanmäl</a>
 
     </div>
   </div>

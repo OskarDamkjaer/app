@@ -203,7 +203,7 @@ var alternativesView = app.views.create('#view-alternatives', {
       routes: [
         {
           name: 'cafe_shift',
-          path: 'cafe_shift/:shiftId',
+          path: 'cafe_shift/:shiftId/:isMe',
           url: './cafe_shift.html'
         }
       ]

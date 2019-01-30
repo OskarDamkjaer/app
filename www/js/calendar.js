@@ -4,7 +4,7 @@ $$(document).on('page:init', '.page[data-name="calendar"]', function () {
 
   // If signed in and calendar container is empty
   if (!jQuery.isEmptyObject($.auth.user) && page.find('#calendar').is(':empty')) {
-    initCalendar(page);
+    initCalendar(page);f
   }
 });
 
