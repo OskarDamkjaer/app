@@ -3,14 +3,16 @@
 // pop-up om man försöker anmäla sig till pass som man inte får anmäla sig till OK
 // Ändra sina uppgifter knapp i formuläret
 // pop-up om man kickar på någon annans pass (?)
+// Bläddra mellan veckorna??
+// Vilken text ska det stå i popup rutorna
+//    //todo is there any longer shifts? for now only two or three hours :)
 
 // TODO:
 //      - if admin all names should show - search for all names
 //      - Group option should pop-up only if övrig is chosen as utskott
 //      - if already signed up on shift autofill..
 $$(document).on('page:init', '.page[data-name="cafe"]', function (e) {
-
-  const events = [ {start: 30, end: 150}, {start: 540, end: 600}, {start: 560, end: 620}, {start: 610, end: 670} ];
+  // Want to collect existing shifts between today and end
   var today = new Date();
   var dd = today.getDate();
   var mm = today.getMonth()+1; //January is 0!
@@ -22,11 +24,13 @@ $$(document).on('page:init', '.page[data-name="cafe"]', function (e) {
       mm = '0'+mm
   }
   today = yyyy + '-' + mm + '-' + dd;
+  // Set end date 7 weeks from now
   var end = new Date();
   end.setDate(end.getDate()+7*7);
   var dd = end.getDate();
   var mm = end.getMonth()+1; //January is 0!
   var yyyy = end.getFullYear();
+  // Change format of string
   if(dd<10) {
       dd = '0'+dd
   }
@@ -34,44 +38,49 @@ $$(document).on('page:init', '.page[data-name="cafe"]', function (e) {
       mm = '0'+mm
   }
   end = yyyy + '-' + mm + '-' + dd;
+  // Collect all sifts between the two dates
+  // NOTE: It is important that the shifts are ordered chronological
   $.getJSON(API + '/cafe?start='+today+'&end='+end)
     .done(function(resp) {
       createDates(resp.cafe_shifts);
     })
-
 });
-var yearList = [];
-var createDates = (shiftdata) => {
-  yearList = [];
-  all_shift = shiftdata;
-  var date = new Date(shiftdata[0].start);
 
+var shiftDict = []; // Global so can reach from initSignUpPage
+
+function createDates(shiftdata){
+  shiftDict = [];
+
+  // Save info about first shift so we have something to compare with
+  var date = new Date(shiftdata[0].start);
   var currentYear = date.getFullYear();
   var currentMonth = date.getMonth();
   var currentDay = date.getDay();
   var currentDate = date.getDate();
   var shift_id = shiftdata[0].id;
+
+  // Save the first date in the dict
   monthString = monthNames[currentMonth];
   dayString = dayNames[currentDay];
-  yearList.push({firstYear: currentYear, // change to thisYear or something
+  // Here you see the structure of the dict
+  shiftDict.push({years: currentYear,
     months: [{days: [{shift:[], date: currentDate, day: dayString}], monthname: monthString}]
    });
+
+  // Initialize some counter variables
   var counter_years = 0;
   var counter_months = 0;
   var counter_days = 0;
-  var is_me = false;
+  var is_me = false; // Use when coloring the shift-boxes
   var last_timestring = 0;
   var timestring = 0;
-//  yearList[counter_years].months[]
-  // console.log(yearList);
-//  yearList[counter_years].months.push({days:[], monthname: currentMonth});
 //TODO: one could probably just update the date object instead of having all strings..
   shiftdata.forEach(function(element){
     date = new Date(element.start);
     shift_id = element.id;
+
+    // Get name of user on shift and if it is me
     user_name = element.user;
-    //console.log('Debug1')
-    //console.log(user_name)
     if(user_name != null){
       user_name = element.user.name;
       if(element.user.id == $.auth.user.id){
@@ -79,41 +88,27 @@ var createDates = (shiftdata) => {
       }else{
         is_me = false;
       }
-    }else{// these if statements could probably look better
+    }else{
       is_me = false;
     }
+
     var minutes = date.getMinutes().toString();
     if(minutes<10){
       minutes = '0' + minutes;
     }
     timestring = date.getHours().toString()+':'+minutes;
+    timestring = format_timestring(timestring, element, date);
 
-    if(element.pass == 1){
-      var minutes = date.getMinutes().toString();
-      if(minutes <10){
-        minutes = '0' + minutes;
-      }
-      timestring += ' - '+ (date.getHours() + 2).toString() +':'+minutes;
-    }else if(element.pass == 2){
-      var minutes = date.getMinutes().toString();
-      if(minutes < 10){
-        minutes = '0' + minutes;
-      }
-      timestring += ' - '+ (date.getHours() + 3).toString() +':'+minutes;
-    }
-    //todo is there any longer shifts? for now only two or three hours :)
       if (date.getFullYear() == currentYear) { //if same year as last element put in same year
         if(date.getMonth() == currentMonth){ //if same month as last month, put in same month
           if(date.getDay() == currentDay){ // if same day as last day, put in same day
             if(timestring == last_timestring){
-              // push the shifts into current day
-              timestring = [];
+              timestring = []; // Don't want to show time for all shifts - only first
             }else{
               last_timestring = timestring;
             }
-
-            yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
-
+            // push the shifts into current day
+            shiftDict[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
         }else{ // create new day if not same as last
           while(date.getDate()-currentDate>1){
             currentDate = currentDate + 1;
@@ -125,9 +120,9 @@ var createDates = (shiftdata) => {
             if(currentDay<6){//Don't show weekends if no shift..
             counter_days++;
               dayString = dayNames[currentDay];
-              yearList[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
+              shiftDict[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
             }else{
-              // maybe add something to distinguish weeks
+              // TODO: maybe add something to distinguish weeks
             }
           }
             currentDay = date.getDay();
@@ -135,9 +130,9 @@ var createDates = (shiftdata) => {
             dayString = dayNames[currentDay];
             counter_days++;
             // push day into current month
-            yearList[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
+            shiftDict[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
             // push the first shift of the day into the day
-            yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
+            shiftDict[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
             last_timestring = timestring;
           }
         }else{ // create new month if not same as last
@@ -148,9 +143,9 @@ var createDates = (shiftdata) => {
           dayString = dayNames[currentDay];
           counter_months++;
           monthString = monthNames[currentMonth];
-          yearList[counter_years].months.push({days:[], monthname: monthString});
-          yearList[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
-          yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id:shift_id, name: user_name, me: is_me});
+          shiftDict[counter_years].months.push({days:[], monthname: monthString});
+          shiftDict[counter_years].months[counter_months].days.push({shift: [], date: currentDate, day: dayString});
+          shiftDict[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id:shift_id, name: user_name, me: is_me});
           last_timestring = timestring;
 
         }
@@ -166,58 +161,70 @@ var createDates = (shiftdata) => {
         currentDay = date.getDay();
         monthString = monthNames[currentMonth];
         dayString = dayNames[currentDay];
-      //  yearList.push({firstYear: currentYear,
-      //    months: [{days: [{shift:[], date: currentDate, day: dayString}], monthname: monthString}]
-      //   });
 
-         yearList.push({firstYear: currentYear, // change to thisYear or something
+         shiftDict.push({years: currentYear,
            months: [{days: [{shift:[], date: currentDate, day: dayString}], monthname: monthString}]
          });
-         yearList[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
+         shiftDict[counter_years].months[counter_months].days[counter_days].shift.push({pass: element.pass, time: timestring, id: shift_id, name: user_name, me: is_me});
          last_timestring = timestring;
-
-          console.log(yearList);
       }
 
     });
 
-    //console.log(yearList);
-    var templateHTML = app.templates.cafeTemplate({years: yearList});
+    // Send the dict to html
+    var templateHTML = app.templates.cafeTemplate({years: shiftDict});
     var cafeList = $('#cafe-list');
     cafeList.html(templateHTML);
   }
 
+function format_timestring(timestring, element, date){
+  // Help function to format the timestring correct
+    if(element.pass == 1){
+      var minutes = date.getMinutes().toString();
+      if(minutes <10){
+        minutes = '0' + minutes;
+      }
+      timestring += ' - '+ (date.getHours() + 2).toString() +':'+minutes;
+    }else if(element.pass == 2){
+      var minutes = date.getMinutes().toString();
+      if(minutes < 10){
+        minutes = '0' + minutes;
+      }
+      timestring += ' - '+ (date.getHours() + 3).toString() +':'+minutes;
+    }
+    return timestring;
+  }
 
   $$(document).on('page:init', '.page[data-name="cafe_shift"]', function (e) {
-    // what is this..
+    // Initialize the sign up page
     var shiftId = e.detail.route.params.shiftId;
     var isMe = e.detail.route.params.isMe;
     var user = $.auth.user;
-    initShiftPage(user, shiftId, isMe);
+    initSignUpPage(user, shiftId, isMe);
   });
 
-  function initShiftPage(user, shiftId, isMe){
+  function initSignUpPage(user, shiftId, isMe){
     // Get information about shift - use to write text in signup page
     var my_user = $.auth.user;
     var isMe = false;
-    for(var year in yearList){
-      for( var month in yearList[year].months){
-        for( var day in yearList[year].months[month].days){
-          for( var shift in yearList[year].months[month].days[day].shift){
-            id = yearList[year].months[month].days[day].shift[shift].id;
+    for(var year in shiftDict){
+      for( var month in shiftDict[year].months){
+        for( var day in shiftDict[year].months[month].days){
+          for( var shift in shiftDict[year].months[month].days[day].shift){
+            id = shiftDict[year].months[month].days[day].shift[shift].id;
             if(id == shiftId){ // Now get info about shift
-              isMe = yearList[year].months[month].days[day].shift[shift].me;
-              shift_user = yearList[year].months[month].days[day].shift[shift].name;
-              year_ = yearList[year];
-              month_ = yearList[year].months[month];
-              day_ = yearList[year].months[month].days[day];
-              shift_ = yearList[year].months[month].days[day].shift[shift];
+              isMe = shiftDict[year].months[month].days[day].shift[shift].me;
+              shift_user = shiftDict[year].months[month].days[day].shift[shift].name;
+              year_ = shiftDict[year];
+              month_ = shiftDict[year].months[month];
+              day_ = shiftDict[year].months[month].days[day];
+              shift_ = shiftDict[year].months[month].days[day].shift[shift];
             }
           }
         }
       }
     }
-    $('#header_text').html('Anmälan till pass kl ' + shift_.time +  '<br/>' + day_.day +' den ' + day_.date + ' ' + month_.monthname + ' ' + year_.firstYear);
+    $('#header_text').html('Anmälan till pass kl ' + shift_.time +  '<br/>' + day_.day +' den ' + day_.date + ' ' + month_.monthname + ' ' + year_.years);
 
     var shift = {
       'id': shiftId,
@@ -225,7 +232,7 @@ var createDates = (shiftdata) => {
       'committe': "",
       'competition': 'yes'};
 
-    app.form.fillFromData('#shift-form', shift); // fill in name TODO: Make unwritable
+    app.form.fillFromData('#shift-form', shift);
 
     // get all possible councils
     var councils_name = [];
@@ -238,7 +245,7 @@ var createDates = (shiftdata) => {
         }
 
       });
-      // initialize scroll council picker
+    // initialize scroll council picker
     var committePicker = app.picker.create({
       inputEl: '#user-committe-input',
       rotateEffect: true,
@@ -250,7 +257,6 @@ var createDates = (shiftdata) => {
         }
       ]
     });
-    // TODO: Connect choise of council to a council-id
     $('.shift-update').on('click', function() {
       updateShift(shift, councils_all);
     });
@@ -259,7 +265,7 @@ var createDates = (shiftdata) => {
     });
     // is this the best way to do it..?
      if(isMe==false){
-       // hide unsign button if it's not your shift..
+       // hide unsign button if not signed up yet
       $('.shift-unsign').hide();
   }else{
       // Here one could add the feature to update info on shif
@@ -280,7 +286,7 @@ function updateShift(shift, councils_all) {
   }
   shift['committe'] = shiftData['committe'];
 
- // Send info to acctual shift
+ // Send info to server and finn in acctual shift
  $.ajax({
    url: API + '/cafe',
     type: 'POST',
@@ -295,8 +301,7 @@ function updateShift(shift, councils_all) {
       }
    },
    success: function(){
-     alternativesView.router.navigate('/cafe/');
-     //alternativesView.router.reload('/cafe/');
+     alternativesView.router.back('/cafe/',{force: true}); // force: reload page
      app.dialog.create({
             title: 'Nu är du uppskriven på passet! ',
             text: 'Tack för att du vill jobba i caféet! Kom ihåg att avanmäla dig om du får förhinder.',
@@ -309,7 +314,9 @@ function updateShift(shift, councils_all) {
           }).open();
    },
    error: function(){
-     alternativesView.router.navigate('/cafe/');
+     // Fail if already signed up on shift at the same time
+     alternativesView.router.back('/cafe/',{force: true});
+
      app.dialog.create({
          title: 'Något gick fel! ',
          text: 'Du kanske redan är anmäld på ett pass vid samma tid?',
@@ -330,10 +337,11 @@ function unsignShift(shift){
      type: 'DELETE',
     dataType: 'json',
     success: function(){
-      alternativesView.router.navigate('/cafe/');
+      alternativesView.router.back('/cafe/',{force: true});
+
          app.dialog.create({
              title: 'Nu är du nu avanmäld från passet! ',
-             text: 'Some text',
+             text: 'Tipsa en kompis om att anmäla sig på passet istället!',
              buttons: [
                {
                  text: 'Ok',
@@ -343,7 +351,8 @@ function unsignShift(shift){
            }).open();
     },
     error: function(){
-      alternativesView.router.navigate('/cafe/');
+      alternativesView.router.back('/cafe/',{force: true});
+
       app.dialog.create({
           title: 'Något gick fel! ',
           text: 'Det gick inte att avanmäla dig från passet.',
